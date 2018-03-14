@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>誓言</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/web3.min.js"></script>
+    <script src="js/truffle-contract.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            $(window).load(function() {
+                if (typeof window.web3 !== 'undefined') {
+                    window.currentProvider = web3.currentProvider;
+                    window.web3 = new Web3(web3.currentProvider);
+                    $.getJSON('Adoption.json', function(data) {
+                        var AdoptionArtifact = data;
+                        window.Adoption = TruffleContract(AdoptionArtifact);
+                        window.Adoption.setProvider(window.currentProvider);
+                        $("#send").click(function (event) {
+                            event.preventDefault();
+                            var adoptionInstance;
+                            window.web3.eth.getAccounts(function(error, accounts) {
+                                if (error) {
+                                    console.log(error);
+                                }
+                                var account = accounts[0];
+                                window.Adoption.deployed().then(function(instance) {
+                                    adoptionInstance = instance;
+                                    return adoptionInstance.setWord($("textarea").val(),"20180314", {from: account});
+                                }).then(function(result) {
+                                    console.log(result)
+                                    alert("发布成功！")
+                                    $("textarea").val("")
+                                }).catch(function(err) {
+                                    console.log(err);
+                                });
+                            });
+                        })
+                        //展示定时器
+                        window.setInterval(function () {
+                            window.Adoption.deployed().then(function(instance) {
+                                window.adoptionInstance = instance;
+                                return adoptionInstance.getAllWord();
+                            }).then(function(result) {
+                                console.log(result)
+                                if (result && result.length > 0 && result[0]) {
+                                    $("ul").html("<li>" + result[0] + "（" + result[1] + "）</li>");
+                                }
+                            }).catch(function(err) {
+                                console.log(err);
+                            });
+                        }, 4000);
+
+                    });
+                } else {
+                    alert("请安装MetaMask插件！")
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <textarea placeholder="请输入誓言（最多100字）" minlength="100" class="col-md-9"></textarea>
+            <button class="btn btn-primary" id="send" class="col-md-3">发送区块链</button>
+        </div>
+        <div class="row">
+            <div class="row">誓言展示</div>
+            <ul class="show"></ul>
+        </div>
+    </div>
+
+</body>
+</html>
