@@ -29,7 +29,7 @@
                                 var account = accounts[0];
                                 window.Adoption.deployed().then(function(instance) {
                                     adoptionInstance = instance;
-                                    return adoptionInstance.setWord($("textarea").val(),"20180314", {from: account});
+                                    return adoptionInstance.setWord($("textarea").val(),""+new Date().getTime(), {from: account});
                                 }).then(function(result) {
                                     console.log(result)
                                     alert("发布成功！")
@@ -47,12 +47,12 @@
                             }).then(function(result) {
                                 console.log(result)
                                 if (result && result.length > 0 && result[0]) {
-                                    $("ul").html("<li>" + result[0] + "（" + result[1] + "）</li>");
+                                    $("ul").html("<li>" + result[0] + "（" + formatTime(result[1]) + "）</li>");
                                 }
                             }).catch(function(err) {
                                 console.log(err);
                             });
-                        }, 4000);
+                        }, 10000);
 
                     });
                 } else {
@@ -60,6 +60,23 @@
                 }
             });
         });
+
+        function formatTime(timestamp) {
+            var date = new Date(parseInt(timestamp))
+            var year = date.getFullYear()
+            var month = date.getMonth() + 1
+            var day = date.getDate()
+            var hour = date.getHours()
+            var minute = date.getMinutes()
+            var second = date.getSeconds()
+            var fDate = [year, month, day, ].map(this.formatNumber)
+            return fDate[0] + '年' + fDate[1] + '月' + fDate[2] + '日' + ' ' + [hour, minute, second].map(this.formatNumber).join(':')
+        }
+        /** 小于10的数字前面加0 */
+        function formatNumber(n) {
+            n = n.toString()
+            return n[1] ? n : '0' + n
+        }
     </script>
 </head>
 <body>
@@ -69,7 +86,7 @@
             <button class="btn btn-primary" id="send" class="col-md-3">发送区块链</button>
         </div>
         <div class="row">
-            <div class="row">誓言展示</div>
+            <div class="row">最新誓言展示</div>
             <ul class="show"></ul>
         </div>
     </div>
